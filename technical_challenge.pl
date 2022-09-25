@@ -21,7 +21,7 @@ while(<IN_F>) {                                 # read the file line by line
     $lines_count++;
     $char_count += length($_);                  # $_ contains the content of the current line
                                                 # Perl will use $_ by default so "length" alone was also correct
-    $words_count += scalar(split(/\s+/, $_));   # explain \s+
+    $words_count += scalar(split(/\W+/, $_));   # Split the current line based on non "non-words" characters
 }
 
 close(IN_F);
