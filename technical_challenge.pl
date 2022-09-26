@@ -3,6 +3,7 @@
 # (from what I read)
 use warnings;
 use strict;
+use JSON; # Installed with cpan
 
 # <my> restricts the variable to the current scope
 # open the file which name is passed as arg (unlike Bash, script name is $0 not @ARGV[0])
@@ -13,8 +14,7 @@ if (not defined $in_file) {
 open(IN_F, '<', $in_file) or die "ERR :::> Couldn't open IN file <$in_file> with error => $!\n";
 print("LOG :::> Opened IN file correctly\n");
 
-# initialize a <tuple?> to contain the counters
-# maybe think about transforming it to an "object" kinda type
+# initialize a variables to contain the counters
 my ($lines_count, $words_count, $char_count) = (0, 0, 0);
 
 while(<IN_F>) {                                 # read the file line by line
@@ -28,16 +28,27 @@ close(IN_F);
 print("LOG :::> Closed IN file\n");
 
 if (defined $lines_count && defined $words_count && defined $char_count) {
-    my $output_string = ".+* The file contains *+.\n\t$lines_count lines\n\t$words_count words\n\t$char_count characters\n";
+    my $results = {
+        Lines => $lines_count,
+        Words => $words_count,
+        Chars => $char_count
+    };
+    my $results_json = encode_json $results;
+
+    # At this point "say $results_json" would've been enough but just for JSON manipulation
+    $results = decode_json $results_json;
+    my $output_string = ".+* The file contains *+.\n\t$results->{Lines} lines\n\t$results->{Words} words\n\t$results->{Chars} characters\n";
+
     if (defined $out_file) {
         open(OUT_F, '>', $out_file) or die "ERR :::> Couldn't open OUT file <$out_file> with error => $!\n";
         print OUT_F $output_string;
         close(OUT_F);
-        print("LOG :::> Output file written correctly !\n")
+        print("LOG :::> Output file written correctly !\n");
     } else {
         print("LOG :::> No output file provided, printing file's stats directly :\n##############################\n");
         print($output_string);
     }
+    
 } else {
     die "ERR :::> Couldn't extract file's stats";
 }
